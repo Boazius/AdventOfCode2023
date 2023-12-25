@@ -3,95 +3,89 @@
 #include <vector>
 #include <string>
 #include <cctype>
+#include <unordered_map>
+#include <algorithm>
 
-// Function to check if a character is a symbol (not a digit or period)
-bool isSymbol(char ch) {
-    return !isdigit(ch) && ch != '.';
-}
+/**
+ * Calculates the sum of gear ratios that have exactly two associated star signs.
+ *
+ * @param grid A 2D grid represented as a vector of strings, containing numbers and '*'.
+ * @return The sum of the gear ratios associated with exactly two star signs.
+ */
+int calculateGearRatioSum(const std::vector<std::string> &grid)
+{
+    // Map to store star sign data: key is the index in the grid, value is a pair of count of adjacent numbers and the product of these numbers
+    std::unordered_map<int, std::pair<int, int>> starSigns;
 
-bool isStarSymbol(char ch) {
-    return ch == '*';
-}
-
-// from coords of the grid where there is a digit, get the number attached to it.
-int getNumberFromDigit(size_t x, size_t y, const std::vector<std::string>& grid) {
-    int num = 0;
-    //go left until you hit a symbol or the edge
-    size_t k = y;
-    while (k > 0 && !isSymbol(grid[x][k])) {
-        --k;
-    }
-    //get the number from the digits
-    k++;
-    while (k < grid[x].size() && isdigit(grid[x][k])) {
-        num = num * 10 + (grid[x][k] - '0');
-        ++k;
-    }
-    return num;
-}
-
-bool getAdjacentNumbers(size_t x, size_t y, const std::vector<std::string>& grid) {
-    // static const int dx[] = {-1, -1, -1, 0, 1, 1, 1, 0};
-    // static const int dy[] = {-1, 0, 1, 1, 1, 0, -1, -1};
-
-    // get the number(s) above the * symbol
-    if (x-1 < grid.size())
+    // Iterate over each row of the grid
+    for (int j = 0; j < static_cast<int>(grid.size()); ++j)
     {
-        //if digit, get the attached number
-        if (isdigit(grid[newX][newY])) 
+        // Iterate over each column of the grid
+        for (int i = 0; i < static_cast<int>(grid[j].length()); ++i)
         {
-            getNumberFromDigit(newX, newY, grid);
-        }
-    }
+            int currentNumber = 0;
+            const int currNumStartIdx = i; // Start index of the current number
 
-    for (int i = 0; i < 8; ++i) {
-        size_t newX = x + dx[i];
-        size_t newY = y + dy[i];
+            // Extracting the number from the grid
+            while (i < static_cast<int>(grid[j].length()) && isdigit(grid[j][i]))
+            {
+                currentNumber = (currentNumber * 10) + (grid[j][i] - '0');
+                ++i;
+            }
 
+            // Process only if a number is found
+            if (i > currNumStartIdx)
+            {
+                // Check adjacent cells for stars
+                for (int x = std::max(j - 1, 0); x < std::min(j + 2, static_cast<int>(grid.size())); ++x)
+                {
+                    for (int y = std::max(currNumStartIdx - 1, 0); y < std::min(i + 1, static_cast<int>(grid[j].length())); ++y)
+                    {
+                        // If a star is found
+                        if (grid[x][y] == '*')
+                        {
+                            // Unique key for the star's position
+                            int key = x * grid[0].length() + y;
 
-    }
-    return false;
-}
+                            // If the key is not present in the map, add it
 
-// Function to check if a cell is the start of a number
-bool isStartOfNumber(size_t x, size_t y, const std::vector<std::string>& grid) {
-    return isdigit(grid[x][y]) && (y == 0 || !isdigit(grid[x][y-1]));
-}
+                            starSigns.emplace(key, std::make_pair(0, 1));
 
-int main() {
-    std::ifstream file("input.txt");
-    std::vector<std::string> grid;
-    std::string line;
-
-    // Read the file into the grid
-    while (std::getline(file, line)) {
-        grid.push_back(line);
-    }
-
-    int sum = 0;
-    // Iterate through each cell in the grid
-    for (size_t i = 0; i < grid.size(); ++i) {
-        for (size_t j = 0; j < grid[i].size(); ++j) {
-            if (isStartOfNumber(i, j, grid)) {
-                int num = 0;
-                size_t k = j;
-                bool adjacentToSymbol = false;
-                // Collect the entire number and check if any digit is adjacent to a symbol
-                while (k < grid[i].size() && isdigit(grid[i][k])) {
-                    num = num * 10 + (grid[i][k] - '0');
-                    if (isAdjacentToSymbol(i, k, grid)) {
-                        adjacentToSymbol = true;
+                            // Increment count and multiply the product for the star sign
+                            ++starSigns[key].first;
+                            starSigns[key].second *= currentNumber;
+                        }
                     }
-                    ++k;
-                }
-                // Add the number to the sum if it's adjacent to a symbol
-                if (adjacentToSymbol) {
-                    sum += num;
                 }
             }
         }
     }
 
-    std::cout << "Sum of all part numbers: " << sum << std::endl;
+    int result = 0;
+    // Calculate the sum of gear ratios for star signs with exactly two adjacent numbers
+    for (const auto &[key, value] : starSigns)
+    {
+        if (value.first == 2)
+        {
+            result += value.second;
+        }
+    }
+    return result;
+}
+
+int main()
+{
+    std::ifstream file("input.txt");
+    std::vector<std::string> grid;
+    std::string line;
+
+    // Read the file line by line and populate the grid
+    while (std::getline(file, line))
+    {
+        grid.push_back(line);
+    }
+
+    // Output the result
+    std::cout << "Sum of all part numbers: " << calculateGearRatioSum(grid) << std::endl;
     return 0;
 }
