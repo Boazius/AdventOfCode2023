@@ -38,9 +38,11 @@ int main()
     std::vector<int> cardCounts;
     cardCounts.push_back(1);
     int currCardIdx{0};
+    int totalCards{0};
 
     while (std::getline(file, line))
     {
+
         std::istringstream iss(line);
 
         // Skip the "Card X:" prefix in each line
@@ -70,15 +72,12 @@ int main()
         {
             cardCounts[i] += cardCounts[currCardIdx];
         }
+        totalCards += cardCounts[currCardIdx];
+        // Move to the next card
         currCardIdx++;
+
     }
 
-    int totalCards = 0;
-    // return sum of cardCounts
-    for (int i = 0; i < static_cast<int>(cardCounts.size()); i++)
-    {
-        totalCards += cardCounts[i];
-    }
     std::cout << "Total cards: " << totalCards << std::endl;
     return 0;
 }
