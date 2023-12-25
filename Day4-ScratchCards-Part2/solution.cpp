@@ -2,82 +2,83 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
-#include <unordered_set>
-#include <string>
-#include <utility>
-#include <queue>
+#include <cctype>
 #include <limits>
+#include <algorithm>
+#include <set>
 
-using namespace std;
+int calculateCardPoints(const std::set<int> &winningNumbers, const std::vector<int> &yourNumbers)
+{
+    return std::count_if(yourNumbers.begin(), yourNumbers.end(),
+                         [&winningNumbers](int num)
+                         { return winningNumbers.find(num) != winningNumbers.end(); });
+}
 
-// Function to parse numbers from a string stream until a "|" character is found.
-// It returns an unordered set of the parsed numbers.
-unordered_set<int> parseNumbers(istringstream& iss) {
-    unordered_set<int> numbers;
-    string segment;
-    while (iss >> segment) {
-        if (segment == "|") break;  // Stop parsing if "|" is encountered
-        numbers.insert(stoi(segment)); // Convert string to integer and insert into set
+// Parses a single line of numbers from the input stream.
+// Stops reading when it encounters the '|' character or end of the line.
+std::vector<int> parseNumbers(std::istringstream &iss)
+{
+    std::vector<int> numbers;
+    std::string segment;
+    while (iss >> segment)
+    {
+        if (segment == "|")
+        {
+            break;
+        }
+        numbers.push_back(std::stoi(segment));
     }
     return numbers;
 }
 
-// Function to count the number of matches between a set of winning numbers
-// and a vector of your numbers. It returns the count of matches.
-int countMatches(const unordered_set<int>& winningNumbers, const vector<int>& yourNumbers) {
-    int matches = 0;
-    for (int num : yourNumbers) {
-        if (winningNumbers.find(num) != winningNumbers.end()) {
-            ++matches; // Increment match count if number is found in winning numbers
+int main()
+{
+    std::ifstream file("input.txt");
+    std::string line;
+    std::vector<int> cardCounts;
+    cardCounts.push_back(1);
+    int currCardIdx{0};
+
+    while (std::getline(file, line))
+    {
+        std::istringstream iss(line);
+
+        // Skip the "Card X:" prefix in each line
+        iss.ignore(std::numeric_limits<std::streamsize>::max(), ':');
+
+        // Read and parse winning numbers
+        std::vector<int> winningNumbers = parseNumbers(iss);
+        std::set<int> winningSet(winningNumbers.begin(), winningNumbers.end());
+
+        // Read and parse your numbers
+        std::vector<int> yourNumbers = parseNumbers(iss);
+
+        // Calculate and accumulate points for each card
+        int currCardWins = calculateCardPoints(winningSet, yourNumbers);
+
+        // Ensure cardCounts is large enough by adding new elements if needed
+        int requiredSize = currCardIdx + 1 + currCardWins;
+        if (static_cast<int>(cardCounts.size()) < requiredSize)
+        {
+            // Add '1's to cardCounts to represent the original card
+            cardCounts.resize(requiredSize, 1);
         }
-    }
-    return matches;
-}
 
-int main() {
-    ifstream file("input.txt"); // Open the file for reading
-    string line;
-    vector<pair<unordered_set<int>, vector<int>>> cards; // Store pairs of winning numbers and your numbers
-
-    // Read each line from the file
-    while (getline(file, line)) {
-        istringstream iss(line);
-        iss.ignore(numeric_limits<streamsize>::max(), ':'); // Ignore characters until ':' is found
-
-        // Parse winning numbers and your numbers from the line
-        unordered_set<int> winningNumbersSet = parseNumbers(iss);
-        vector<int> winningNumbers(winningNumbersSet.begin(), winningNumbersSet.end());
-        unordered_set<int> yourNumbersSet = parseNumbers(iss);
-        vector<int> yourNumbers(yourNumbersSet.begin(), yourNumbersSet.end());
-
-        // Store the parsed numbers as a pair in the cards vector
-        cards.emplace_back(move(winningNumbersSet), move(yourNumbers));
+        // Distribute the count of the current card to the next currCardWins cards
+        int endIdx = std::min(currCardIdx + 1 + currCardWins, static_cast<int>(cardCounts.size()));
+        for (int i = currCardIdx + 1; i < endIdx; ++i)
+        {
+            cardCounts[i] += cardCounts[currCardIdx];
+        }
+        currCardIdx++;
     }
 
     int totalCards = 0;
-    queue<size_t> cardQueue; // Queue to manage card processing
-
-    // Initialize the queue with indices of all cards
-    for (size_t i = 0; i < cards.size(); ++i) {
-        cardQueue.push(i);
+    // return sum of cardCounts
+    for (int i = 0; i < static_cast<int>(cardCounts.size()); i++)
+    {
+        totalCards += cardCounts[i];
     }
-
-    // Process each card in the queue
-    while (!cardQueue.empty()) {
-        size_t cardIndex = cardQueue.front(); // Get the index of the current card
-        cardQueue.pop();
-        totalCards += 1; // Increment total cards processed
-
-        // Count matches for the current card
-        int matches = countMatches(cards[cardIndex].first, cards[cardIndex].second);
-
-        // Enqueue additional cards based on the number of matches
-        for (int j = 1; j <= matches && cardIndex + j < cards.size(); ++j) {
-            cardQueue.push(cardIndex + j);
-        }
-    }
-
-    // Output the total number of scratchcards processed
-    cout << "Total scratchcards: " << totalCards << endl;
+    std::cout << "Total cards: " << totalCards << std::endl;
     return 0;
 }
