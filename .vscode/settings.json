@@ -54,5 +54,6 @@
     "cSpell.words": [
         "cfloats",
         "cout"
-    ]
+    ],
+    "C_Cpp.errorSquiggles": "disabled"
 }
