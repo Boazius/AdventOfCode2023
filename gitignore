@@ -3,4 +3,5 @@
 *.exe
 
 # Ignore input.txt files in all directories
-input.txt
+**/input.txt
+
