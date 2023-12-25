@@ -1,0 +1,6 @@
+
+# Ignore .exe files in all directories
+*.exe
+
+# Ignore input.txt files in all directories
+input.txt
