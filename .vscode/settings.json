@@ -50,7 +50,8 @@
         "ctime": "cpp",
         "regex": "cpp",
         "sstream": "cpp",
-        "set": "cpp"
+        "set": "cpp",
+        "unordered_set": "cpp"
     },
     "cSpell.words": [
         "cfloats",
