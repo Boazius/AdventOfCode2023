@@ -2,3 +2,10 @@ Day4-ScratchCards-Part2/input.txt
 Day5-IfYouGiveASeedAFertilizer/input.txt
 Day5-IfYouGiveASeedAFertilizer-Part2/input.txt
 Day5-IfYouGiveASeedAFertilizer-Part2/input2.txt
+
+# Ignore .exe files in all directories
+*.exe
+
+# Ignore input.txt files in all directories
+**/input.txt
+
