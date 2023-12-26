@@ -1,15 +1,8 @@
-Day4-ScratchCards-Part2/input.txt
-Day5-IfYouGiveASeedAFertilizer/input.txt
-Day5-IfYouGiveASeedAFertilizer-Part2/input.txt
-Day5-IfYouGiveASeedAFertilizer-Part2/input2.txt
-
 # Ignore .exe files in all directories
 *.exe
 
-# Ignore input.txt files in all directories
+# Ignore .txt files in all directories
 **/input.txt
-
-Day6-WaitForIt/sample.txt
-Day6-WaitForIt-Part2/sample.txt
-Day7-CamelCards/sample.txt
-Day7-CamelCards-Part2/sample.txt
+**/sample.txt
+**/output.txt
+**/input2.txt
